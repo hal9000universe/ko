@@ -1,0 +1,2 @@
+# ko
+comprehending information & probability
