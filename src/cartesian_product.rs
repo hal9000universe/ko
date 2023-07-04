@@ -1,3 +1,43 @@
+//! Cartesian product of vectors.
+//!
+//! # Example 1
+//! ```
+//! use ko::cartesian_product;
+//!
+//! // vectors to be multiplied
+//! let a = vec![1, 2];
+//! let b = vec![4, 5];
+//!
+//! // calculate cartesian product
+//! let product = cartesian_product!(a, b);
+//!
+//! // check result
+//! assert_eq!(product, vec![
+//!   vec![1, 4], vec![2, 4], 
+//!  vec![1, 5], vec![2, 5],
+//! ]);
+//! ```
+//!
+//! # Example 2
+//! ```
+//! use ko::cartesian_product;
+//!
+//! // vectors to be multiplied
+//! let a = vec![1, 2];
+//! let b = vec![4, 5];
+//!
+//! // concatenate vectors
+//! let vectors = vec![a, b];
+//!
+//! // calculate cartesian product
+//! let product = cartesian_product!(vectors);
+//!
+//! // check result
+//! assert_eq!(product, vec![
+//!   vec![1, 4], vec![2, 4], 
+//!  vec![1, 5], vec![2, 5],
+//! ]);
+//! ```
 #[macro_export]
 macro_rules! cartesian_product {
     ( $vectors:ident ) => {

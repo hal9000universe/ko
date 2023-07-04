@@ -1,9 +1,9 @@
 use crate::cartesian_product;
 use crate::joint_distribution;
-use crate::DiscreteProbabilityDistribution;
+use crate::distribution::DiscreteProbabilityDistribution;
 
 pub fn entropy<T>(dist: &DiscreteProbabilityDistribution<T>) -> f64 {
-    // returns the entropy of a discrete probability distribution in shannons
+    //! returns the entropy of a discrete probability distribution in shannons
     -dist
         .probabilities()
         .into_iter()
@@ -18,7 +18,7 @@ pub fn mutual_information<T>(
 where
     T: Copy,
 {
-    // returns the mutual information of two discrete probability distributions in shannons
+    //! returns the mutual information of two discrete probability distributions in shannons
     entropy(dist_x) + entropy(dist_y) - entropy(&joint_dist)
 }
 
@@ -26,6 +26,6 @@ pub fn joint_entropy(
     dist_x: &DiscreteProbabilityDistribution<i32>,
     dist_y: &DiscreteProbabilityDistribution<i32>,
 ) -> f64 {
-    // returns the joint entropy of two discrete independent probability distributions in shannons
+    //! returns the joint entropy of two discrete probability distributions in shannons
     entropy(&joint_distribution!(dist_x, dist_y))
 }
