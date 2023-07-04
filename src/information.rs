@@ -1,6 +1,6 @@
 use crate::cartesian_product;
-use crate::joint_distribution;
 use crate::distribution::DiscreteProbabilityDistribution;
+use crate::joint_distribution;
 
 pub fn entropy<T>(dist: &DiscreteProbabilityDistribution<T>) -> f64 {
     //! returns the entropy of a discrete probability distribution in shannons

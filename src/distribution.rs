@@ -1,42 +1,42 @@
 //! Probability distributions.
-//! 
+//!
 //! This module contains the `DiscreteProbabilityDistribution` struct, which
 //! represents a discrete probability distribution. It is parameterized by the
 //! type of the outcomes. The outcomes must be `Eq` and `Clone`, and the
 //! probabilities must be non-negative and sum to 1.
-//! 
+//!
 //! The `DiscreteProbabilityDistribution` struct has the following methods:
-//! 
+//!
 //! - `new(outcomes: Vec<T>, probabilities: Vec<f64>) -> Self`: creates a new
 //!  `DiscreteProbabilityDistribution` from a vector of outcomes and a vector
 //! of probabilities.
-//! 
+//!
 //! - `probabilities(&self) -> Vec<f64>`: returns the probabilities of the
 //! outcomes.
-//! 
+//!
 //! - `outcomes(&self) -> Vec<T>`: returns the outcomes.
-//! 
+//!
 //! - `pmf(&self, x: T) -> f64`: returns the probability mass function of the
 //! outcome `x`.
-//! 
+//!
 //! - `multinomial(probabilities: Vec<f64>) -> Self`: creates a new
 //! `DiscreteProbabilityDistribution` from a vector of probabilities. The
 //! outcomes are the integers from 0 to `probabilities.len() - 1`.
-//! 
+//!
 //! # Examples
-//! 
+//!
 //! ```
 //! use ko::distribution::DiscreteProbabilityDistribution;
-//! 
+//!
 //! // define outcomes
 //! let outcomes = vec!["a", "b", "c"];
-//! 
+//!
 //! // define probabilities
 //! let probabilities = vec![0.1, 0.2, 0.7];
-//! 
+//!
 //! // create discrete probability distribution
 //! let d = DiscreteProbabilityDistribution::new(outcomes, probabilities);
-//! 
+//!
 //! // check probabilities
 //! assert_eq!(d.pmf("a"), 0.1);
 //! assert_eq!(d.pmf("b"), 0.2);
@@ -53,9 +53,9 @@ impl<T> DiscreteProbabilityDistribution<T> {
     pub fn new(outcomes: Vec<T>, probabilities: Vec<f64>) -> Self {
         //! Creates a new `DiscreteProbabilityDistribution` from a vector of
         //! outcomes and a vector of probabilities.
-        //! 
+        //!
         //! # Panics
-        //! 
+        //!
         //! Panics if the lengths of the vectors are not equal, if the
         //! probabilities are not non-negative, or if the probabilities do not
         //! sum to 1.

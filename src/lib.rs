@@ -1,6 +1,7 @@
 pub mod cartesian_product;
 pub mod convolution;
 pub mod distribution;
+pub mod function;
 pub mod information;
 pub mod joint_distribution;
 pub mod moment;
@@ -8,9 +9,9 @@ pub mod tests;
 
 use convolution::{discrete_convolution, special_convolution};
 use distribution::DiscreteProbabilityDistribution;
+use function::{ContinuousFunction, DiscreteFunction, Function};
 use information::{entropy, joint_entropy, mutual_information};
 use moment::{central_moment, moment};
-
 
 pub fn all() {
     // discrete probability distribution
@@ -65,4 +66,12 @@ pub fn all() {
             .iter()
             .fold(0., |sum, x| sum + x)
     );
+
+    // continuous function
+    let f: ContinuousFunction = ContinuousFunction::new(vec![0., 1.], vec![0., 1.], |x| x * x);
+    println!("Continuous Function at 0.5: {}", f.eval(&0.5));
+
+    // discrete function
+    let f: DiscreteFunction<i32, i32> = DiscreteFunction::new(vec![0, 1], |x| x * x);
+    println!("Discrete Function at 0.5: {}", f.eval(&1));
 }

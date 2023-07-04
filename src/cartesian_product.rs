@@ -13,7 +13,7 @@
 //!
 //! // check result
 //! assert_eq!(product, vec![
-//!   vec![1, 4], vec![2, 4], 
+//!   vec![1, 4], vec![2, 4],
 //!  vec![1, 5], vec![2, 5],
 //! ]);
 //! ```
@@ -34,7 +34,7 @@
 //!
 //! // check result
 //! assert_eq!(product, vec![
-//!   vec![1, 4], vec![2, 4], 
+//!   vec![1, 4], vec![2, 4],
 //!  vec![1, 5], vec![2, 5],
 //! ]);
 //! ```
