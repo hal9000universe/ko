@@ -1,2 +1,2 @@
 # ko
-comprehending information & probability
+inspired by the ko concept from go
