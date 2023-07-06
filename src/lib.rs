@@ -10,7 +10,7 @@ pub mod tests;
 use continuous_distribution::{ContinuousProbabilityDistribution, NormalDistribution};
 use convolution::discrete_convolution;
 use discrete_distribution::DiscreteProbabilityDistribution;
-use information::{entropy, joint_entropy, mutual_information};
+use information::{entropy, joint_entropy};
 use moment::{central_moment, moment};
 
 pub fn all() {
@@ -26,12 +26,6 @@ pub fn all() {
 
     // entropy
     println!("Entropy: {:?}", entropy(&dist));
-
-    // mutual information
-    println!(
-        "Mutual Information: {:?}",
-        mutual_information(&dist, &dist, &joint_dist)
-    );
 
     // joint entropy
     println!("Joint Entropy: {:?}", joint_entropy(&dist, &dist));

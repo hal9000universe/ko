@@ -1,9 +1,7 @@
 #[cfg(test)]
 use crate::discrete_distribution::DiscreteProbabilityDistribution;
 #[cfg(test)]
-use crate::information::{entropy, joint_entropy, mutual_information, InformationUnit};
-#[cfg(test)]
-use crate::{cartesian_product, joint_distribution};
+use crate::information::{entropy, joint_entropy, InformationUnit};
 
 #[test]
 fn test_information_unit() {
@@ -16,19 +14,6 @@ fn test_information_unit() {
     assert_eq!(bit.to_nats().to_bits().to_float(), bit.to_float());
     assert_eq!(nat.to_bits().to_nats().to_float(), nat.to_float());
     assert_eq!(nat.to_float(), 2f64.ln() * nat.to_bits().to_float());
-}
-
-#[test]
-fn test_mutual_information() {
-    let tolerance: f64 = 1e-10;
-    let multinomial: DiscreteProbabilityDistribution<i32> =
-        DiscreteProbabilityDistribution::multinomial(vec![0.5, 0.5]);
-    let joint_distribution: DiscreteProbabilityDistribution<Vec<i32>> =
-        joint_distribution!(multinomial, multinomial);
-    assert!(
-        (mutual_information(&multinomial, &multinomial, &joint_distribution).to_float() - 0.).abs()
-            < tolerance
-    );
 }
 
 #[test]

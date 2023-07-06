@@ -150,7 +150,7 @@ fn factorial(n: i32) -> i32 {
 }
 
 fn binomial_coeff(n: i32, k: i32) -> i32 {
-    //! Returns the binomial coefficient of `n` over `k`.
+    //! Returns the binomial coefficient `n` over `k`.
     factorial(n) / (factorial(k) * factorial(n - k))
 }
 
