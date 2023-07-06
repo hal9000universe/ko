@@ -1,8 +1,5 @@
 # TODO
 
-- [ ] add more tests
-- [ ] add addition to information unit
-
 
 # OKAs
 

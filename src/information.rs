@@ -31,7 +31,12 @@ use crate::cartesian_product;
 use crate::discrete_distribution::DiscreteProbabilityDistribution;
 use crate::joint_distribution;
 
-#[derive(Debug)]
+use std::{
+    f64::consts::E,
+    ops::{Add, Sub},
+};
+
+#[derive(Debug, Copy, Clone)]
 pub enum InformationUnit {
     Bit(f64),
     Nat(f64),
@@ -41,13 +46,13 @@ impl InformationUnit {
     pub fn to_bits(&self) -> InformationUnit {
         match self {
             InformationUnit::Bit(x) => InformationUnit::Bit(*x),
-            InformationUnit::Nat(x) => InformationUnit::Bit(x / 1.4426950408889634),
+            InformationUnit::Nat(x) => InformationUnit::Bit(x * E.log2()),
         }
     }
 
     pub fn to_nats(&self) -> InformationUnit {
         match self {
-            InformationUnit::Bit(x) => InformationUnit::Nat(x * 1.4426950408889634),
+            InformationUnit::Bit(x) => InformationUnit::Nat(x * 2f64.ln()),
             InformationUnit::Nat(x) => InformationUnit::Nat(*x),
         }
     }
@@ -56,6 +61,40 @@ impl InformationUnit {
         match self {
             InformationUnit::Bit(x) => *x,
             InformationUnit::Nat(x) => *x,
+        }
+    }
+}
+
+impl Add for InformationUnit {
+    type Output = InformationUnit;
+
+    fn add(self, other: InformationUnit) -> InformationUnit {
+        match (self, other) {
+            (InformationUnit::Bit(x), InformationUnit::Bit(y)) => InformationUnit::Bit(x + y),
+            (InformationUnit::Nat(x), InformationUnit::Nat(y)) => InformationUnit::Nat(x + y),
+            (InformationUnit::Bit(x), InformationUnit::Nat(y)) => {
+                InformationUnit::Bit(x + y * E.log2())
+            }
+            (InformationUnit::Nat(x), InformationUnit::Bit(y)) => {
+                InformationUnit::Bit(x * E.log2() + y)
+            }
+        }
+    }
+}
+
+impl Sub for InformationUnit {
+    type Output = InformationUnit;
+
+    fn sub(self, other: InformationUnit) -> InformationUnit {
+        match (self, other) {
+            (InformationUnit::Bit(x), InformationUnit::Bit(y)) => InformationUnit::Bit(x - y),
+            (InformationUnit::Nat(x), InformationUnit::Nat(y)) => InformationUnit::Nat(x - y),
+            (InformationUnit::Bit(x), InformationUnit::Nat(y)) => {
+                InformationUnit::Bit(x - y / 2f64.ln())
+            }
+            (InformationUnit::Nat(x), InformationUnit::Bit(y)) => {
+                InformationUnit::Bit(x / 2f64.ln() - y)
+            }
         }
     }
 }
@@ -79,9 +118,7 @@ where
     T: Copy,
 {
     //! returns the mutual information of two discrete probability distributions in bits
-    InformationUnit::Bit(
-        entropy(dist_x).to_float() + entropy(dist_y).to_float() - entropy(&joint_dist).to_float(),
-    )
+    entropy(dist_x) + entropy(dist_y) - entropy(&joint_dist)
 }
 
 pub fn joint_entropy(
