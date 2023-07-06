@@ -38,6 +38,7 @@
 //!  vec![1, 5], vec![2, 5],
 //! ]);
 //! ```
+
 #[macro_export]
 macro_rules! cartesian_product {
     ( $vectors:ident ) => {

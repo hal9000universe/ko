@@ -27,7 +27,7 @@ pub trait ContinuousProbabilityDistribution {
         //! Returns the measure of the distribution over the set `domain`.
         assert!(domain.0 < domain.1);
         // measure function over interval
-        let mut measure = 0.0;
+        let mut measure: f64 = 0.0;
         let mut x: f64 = domain.0;
         while x < domain.1 {
             if x + EPSILON < domain.1 {
@@ -58,12 +58,12 @@ impl NormalDistribution {
 
 impl ContinuousProbabilityDistribution for NormalDistribution {
     fn domain(&self) -> (f64, f64) {
-        //! Returns the domain of the distribution.
+        //! Returns the domain of the pdf.
         (-f64::INFINITY, f64::INFINITY)
     }
 
     fn range(&self) -> (f64, f64) {
-        //! Returns the range of the distribution.
+        //! Returns the range of the pdf.
         (0., f64::INFINITY)
     }
 

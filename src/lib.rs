@@ -1,15 +1,15 @@
 pub mod cartesian_product;
+pub mod continuous_distribution;
 pub mod convolution;
-pub mod distribution;
-pub mod function;
+pub mod discrete_distribution;
 pub mod information;
 pub mod joint_distribution;
 pub mod moment;
 pub mod tests;
 
-use convolution::{discrete_convolution, special_convolution};
-use distribution::DiscreteProbabilityDistribution;
-use function::{ContinuousFunction, DiscreteFunction, Function};
+use continuous_distribution::{ContinuousProbabilityDistribution, NormalDistribution};
+use convolution::discrete_convolution;
+use discrete_distribution::DiscreteProbabilityDistribution;
 use information::{entropy, joint_entropy, mutual_information};
 use moment::{central_moment, moment};
 
@@ -23,16 +23,6 @@ pub fn all() {
     // joint distribution
     let joint_dist: DiscreteProbabilityDistribution<Vec<i32>> = joint_distribution!(dist, dist);
     println!("Joint Distribution: {:?}", joint_dist);
-
-    // special distribution
-    let special_dist: DiscreteProbabilityDistribution<f64> =
-        DiscreteProbabilityDistribution::new(vec![1., 2.], vec![0.5, 0.5]);
-    println!("Special Distribution: {:?}", special_dist);
-
-    // special convolution
-    let conv_dist: DiscreteProbabilityDistribution<f64> =
-        special_convolution(&special_dist, &special_dist);
-    println!("Special Convolution: {:?}", conv_dist);
 
     // entropy
     println!("Entropy: {:?}", entropy(&dist));
@@ -59,19 +49,16 @@ pub fn all() {
     );
 
     // probability sum of discrete convolution
+    let disc_conv_dist: DiscreteProbabilityDistribution<i32> = discrete_convolution(&dist, &dist);
     println!(
         "Probability Sum of Discrete Convolution: {}",
-        discrete_convolution(&dist, &dist)
-            .probabilities
-            .iter()
-            .fold(0., |sum, x| sum + x)
+        disc_conv_dist.measure(&disc_conv_dist.outcomes())
     );
 
-    // continuous function
-    let f: ContinuousFunction = ContinuousFunction::new(vec![0., 1.], vec![0., 1.], |x| x * x);
-    println!("Continuous Function at 0.5: {}", f.eval(&0.5));
-
-    // discrete function
-    let f: DiscreteFunction<i32, i32> = DiscreteFunction::new(vec![0, 1], |x| x * x);
-    println!("Discrete Function at 0.5: {}", f.eval(&1));
+    // continuous probability distribution
+    let cont_dist: NormalDistribution = NormalDistribution::new(0., 1.);
+    println!("Continuous Distribution: {:?}", cont_dist);
+    println!("Probability Density at 0: {:?}", cont_dist.pdf(0.));
+    println!("Cumulative Density at 0: {:?}", cont_dist.cdf(0.));
+    println!("Sample: {:?}", cont_dist.sample());
 }
