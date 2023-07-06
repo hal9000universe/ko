@@ -33,12 +33,14 @@ fn test_pmf() {
 #[test]
 fn test_discrete_measure() {
     let tolerance: f64 = 1e-10;
-    let binomial_distribution: DiscreteProbabilityDistribution<i32> = DiscreteProbabilityDistribution::binomial(5, 0.5);
-    assert!((binomial_distribution.measure(&binomial_distribution.outcomes) - 1.).abs() < tolerance);
+    let binomial_distribution: DiscreteProbabilityDistribution<i32> =
+        DiscreteProbabilityDistribution::binomial(5, 0.5);
+    assert!(
+        (binomial_distribution.measure(&binomial_distribution.outcomes) - 1.).abs() < tolerance
+    );
     assert!((binomial_distribution.measure(&vec![0, 1, 2]) - 0.5).abs() < tolerance);
     assert!((binomial_distribution.measure(&vec![0, 1, 2, 3]) - 0.8125).abs() < tolerance);
 }
-
 
 #[test]
 fn test_binomial_distributions() {
@@ -46,7 +48,11 @@ fn test_binomial_distributions() {
     let max_n: i32 = 12;
     let p: f64 = 0.5;
     for n in 1..max_n {
-        let binomial_distribution: DiscreteProbabilityDistribution<i32> = DiscreteProbabilityDistribution::binomial(n, p);
-        assert!((binomial_distribution.measure(&binomial_distribution.outcomes()) - 1.).abs() < tolerance);
+        let binomial_distribution: DiscreteProbabilityDistribution<i32> =
+            DiscreteProbabilityDistribution::binomial(n, p);
+        assert!(
+            (binomial_distribution.measure(&binomial_distribution.outcomes()) - 1.).abs()
+                < tolerance
+        );
     }
 }

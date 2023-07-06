@@ -49,8 +49,10 @@ pub fn discrete_convolution(
     //! assert_eq!(conv_dist.outcomes(), vec![0, 1, 2]);
     //! assert_eq!(conv_dist.probabilities(), vec![0.25, 0.5, 0.25]);
     //! ```
-    let min: i32 = dist_x.outcomes().iter().min().unwrap() + dist_y.outcomes().iter().min().unwrap();
-    let max: i32 = dist_x.outcomes().iter().max().unwrap() + dist_y.outcomes().iter().max().unwrap();
+    let min: i32 =
+        dist_x.outcomes().iter().min().unwrap() + dist_y.outcomes().iter().min().unwrap();
+    let max: i32 =
+        dist_x.outcomes().iter().max().unwrap() + dist_y.outcomes().iter().max().unwrap();
     let outcomes: Vec<i32> = (min..max + 1).collect();
     // compute probabilities
     let probabilities: Vec<f64> = outcomes
