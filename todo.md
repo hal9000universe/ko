@@ -1,6 +1,6 @@
 # TODO
 
-- [ ] implement divergences
+- [ ] generalize divergences to traits
 - [ ] implement construct method for binomial distribution (etc.)
 - [ ] create several (possibly different) binomial distributions and sample from them
 - [ ] reconstruct binomial distributions and evaluate reconstruction fidelity

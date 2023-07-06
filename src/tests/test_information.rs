@@ -1,7 +1,7 @@
 #[cfg(test)]
 use crate::discrete_distribution::DiscreteProbabilityDistribution;
 #[cfg(test)]
-use crate::information::{entropy, joint_entropy, InformationUnit};
+use crate::information::{entropy, joint_entropy, kullback_leibler_divergence, jensen_shannon_divergence, InformationUnit};
 
 #[test]
 fn test_information_unit() {
@@ -17,6 +17,16 @@ fn test_information_unit() {
 }
 
 #[test]
+fn test_entropy() {
+    let tolerance: f64 = 1e-10;
+    let multinomial: DiscreteProbabilityDistribution<i32> =
+        DiscreteProbabilityDistribution::multinomial(vec![0.5, 0.5]);
+    let entropy: f64 = entropy(&multinomial).to_float();
+    assert!(entropy > 0.);
+    assert!((entropy - 1.).abs() < tolerance);
+}
+
+#[test]
 fn test_joint_entropy() {
     let tolerance: f64 = 1e-10;
     let multinomial: DiscreteProbabilityDistribution<i32> =
@@ -27,4 +37,26 @@ fn test_joint_entropy() {
         (joint_entropy - entropy(&multinomial).to_float() - entropy(&multinomial).to_float()).abs()
             < tolerance
     );
+}
+
+#[test]
+fn test_kullback_leibler_divergence() {
+    let tolerance: f64 = 1e-10;
+    let multinomial: DiscreteProbabilityDistribution<i32> =
+        DiscreteProbabilityDistribution::multinomial(vec![0.5, 0.5]);
+    let divergence_value: f64 =
+        kullback_leibler_divergence(&multinomial, &multinomial).to_float();
+    assert!(divergence_value >= 0.);
+    assert!((divergence_value - 0.).abs() < tolerance);
+}
+
+#[test]
+fn test_jensen_shannon_divergence() {
+    let tolerance: f64 = 1e-10;
+    let multinomial: DiscreteProbabilityDistribution<i32> =
+        DiscreteProbabilityDistribution::multinomial(vec![0.5, 0.5]);
+    let divergence_value: f64 =
+        jensen_shannon_divergence(&multinomial, &multinomial).to_float();
+    assert!(divergence_value >= 0.);
+    assert!((divergence_value - 0.).abs() < tolerance);
 }

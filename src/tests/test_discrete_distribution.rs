@@ -46,13 +46,15 @@ fn test_discrete_measure() {
 fn test_binomial_distributions() {
     let tolerance: f64 = 1e-10;
     let max_n: i32 = 12;
-    let p: f64 = 0.5;
-    for n in 1..max_n {
-        let binomial_distribution: DiscreteProbabilityDistribution<i32> =
-            DiscreteProbabilityDistribution::binomial(n, p);
-        assert!(
-            (binomial_distribution.measure(&binomial_distribution.outcomes()) - 1.).abs()
-                < tolerance
-        );
+    let num_p: i32 = 10;
+    for p in (0..num_p).map(|x| x as f64 / num_p as f64) {
+        for n in 1..max_n {
+            let binomial_distribution: DiscreteProbabilityDistribution<i32> =
+                DiscreteProbabilityDistribution::binomial(n, p);
+            assert!(
+                (binomial_distribution.measure(&binomial_distribution.outcomes()) - 1.).abs()
+                    < tolerance
+            );
+        }
     }
 }

@@ -10,8 +10,9 @@ pub mod tests;
 use continuous_distribution::{ContinuousProbabilityDistribution, NormalDistribution};
 use convolution::discrete_convolution;
 use discrete_distribution::DiscreteProbabilityDistribution;
-use information::{entropy, joint_entropy};
+use information::{InformationUnit, entropy, joint_entropy, kullback_leibler_divergence, jensen_shannon_divergence};
 use moment::{central_moment, moment};
+
 
 pub fn all() {
     // discrete probability distribution
@@ -25,10 +26,19 @@ pub fn all() {
     println!("Joint Distribution: {:?}", joint_dist);
 
     // entropy
-    println!("Entropy: {:?}", entropy(&dist));
+    let dist_entropy: InformationUnit = entropy(&dist);
+    println!("Entropy: {:?}", dist_entropy);
 
     // joint entropy
     println!("Joint Entropy: {:?}", joint_entropy(&dist, &dist));
+
+    // Kullback-Leibler divergence
+    let dist_x: DiscreteProbabilityDistribution<i32> = DiscreteProbabilityDistribution::multinomial(vec![0.5, 0.5]);
+    let dist_y: DiscreteProbabilityDistribution<i32> = DiscreteProbabilityDistribution::multinomial(vec![0.75, 0.25]);
+    println!("Kullback-Leibler Divergence: {:?}", kullback_leibler_divergence(&dist_x, &dist_y));
+
+    // Jensen-Shannon divergence
+    println!("Jensen-Shannon Divergence: {:?}", jensen_shannon_divergence(&dist_x, &dist_y));
 
     // moment
     println!("Mean: {:?}", moment(1, &dist));

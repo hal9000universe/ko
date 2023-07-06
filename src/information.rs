@@ -60,6 +60,13 @@ impl InformationUnit {
             InformationUnit::Nat(x) => *x,
         }
     }
+
+    pub fn apply(&self, func: impl Fn(f64) -> f64) -> InformationUnit {
+        match self {
+            InformationUnit::Bit(x) => InformationUnit::Bit(func(*x)),
+            InformationUnit::Nat(x) => InformationUnit::Nat(func(*x)),
+        }
+    }
 }
 
 impl Add for InformationUnit {
@@ -112,4 +119,56 @@ pub fn joint_entropy(
 ) -> InformationUnit {
     //! returns the joint entropy of two discrete probability distributions in bits
     entropy(&joint_distribution!(dist_x, dist_y))
+}
+
+pub fn kullback_leibler_divergence(
+    dist_x: &DiscreteProbabilityDistribution<i32>,
+    dist_y: &DiscreteProbabilityDistribution<i32>,
+) -> InformationUnit {
+    //! returns the Kullback-Leibler divergence of two discrete probability distributions in bits
+    let mut outcomes: Vec<i32> = dist_x.outcomes();
+    outcomes.append(&mut dist_y.outcomes());
+    InformationUnit::Bit(
+        outcomes
+            .iter()
+            .map(|&x| x)
+            .collect::<std::collections::HashSet<i32>>()
+            .iter()
+            .map(|x| {
+                let p_x: f64 = dist_x.pmf(x);
+                let p_y: f64 = dist_y.pmf(x);
+                p_x * (p_x / p_y).log2()
+            })
+            .sum(),
+    )
+}
+
+fn average_discrete_distributions(
+    dist_x: &DiscreteProbabilityDistribution<i32>,
+    dist_y: &DiscreteProbabilityDistribution<i32>,
+) -> DiscreteProbabilityDistribution<i32> {
+    let mut outcomes: Vec<i32> = dist_x.outcomes();
+    outcomes.append(&mut dist_y.outcomes());
+    let outcomes: Vec<i32> = outcomes
+        .iter()
+        .map(|&x| x)
+        .collect::<std::collections::HashSet<i32>>()
+        .iter()
+        .map(|&x| x)
+        .collect();
+    let probabilities: Vec<f64> = outcomes
+        .iter()
+        .map(|x| (dist_x.pmf(x) + dist_y.pmf(x)) / 2.)
+        .collect();
+    DiscreteProbabilityDistribution::new(outcomes, probabilities)
+}
+
+pub fn jensen_shannon_divergence(
+    dist_x: &DiscreteProbabilityDistribution<i32>,
+    dist_y: &DiscreteProbabilityDistribution<i32>,
+) -> InformationUnit {
+    //! returns the Jensen-Shannon divergence of two discrete probability distributions in bits
+    let m: DiscreteProbabilityDistribution<i32> = average_discrete_distributions(dist_x, dist_y);
+    (kullback_leibler_divergence(dist_x, &m) + kullback_leibler_divergence(dist_y, &m))
+        .apply(|x| x / 2.)
 }

@@ -16,12 +16,21 @@
 //!
 //! - `outcomes(&self) -> Vec<T>`: returns the outcomes.
 //!
+//! - `sample(&self) -> T`: returns a random outcome.
+//!
 //! - `pmf(&self, x: T) -> f64`: returns the probability mass function of the
 //! outcome `x`.
+//!
+//! - `measure(&self, domain: &[T]) -> f64`: returns the measure of the
+//! distribution over the set `domain`.
 //!
 //! - `multinomial(probabilities: Vec<f64>) -> Self`: creates a new
 //! `DiscreteProbabilityDistribution` from a vector of probabilities. The
 //! outcomes are the integers from 0 to `probabilities.len() - 1`.
+//!
+//! - 'binomial(n: usize, p: f64) -> Self': creates a new
+//! `DiscreteProbabilityDistribution` from a number of trials `n` and a
+//! probability of success `p`. The outcomes are the integers from 0 to `n`.
 //!
 //! # Examples
 //!
@@ -69,7 +78,7 @@ impl<T> DiscreteProbabilityDistribution<T> {
             "outcomes and probabilities must have the same length"
         );
         assert!(
-            probabilities.iter().all(|&p| p >= 0.),
+            probabilities.iter().all(|&p| p >= -1e-10),
             "probabilities must be non-negative"
         );
         assert!(
@@ -179,5 +188,86 @@ impl DiscreteProbabilityDistribution<i32> {
             .map(|k| binomial_coeff(n, *k) as f64 * p.powi(*k) * (1. - p).powi(n - *k))
             .collect();
         Self::new(outcomes, probabilities)
+    }
+}
+
+pub fn discrete_distribution_metric<T>(
+    dist_x: &DiscreteProbabilityDistribution<T>,
+    dist_y: &DiscreteProbabilityDistribution<T>,
+) -> f64
+where
+    T: Eq + Hash + Copy,
+{
+    //! Returns the metric between two discrete probability distributions.
+    //!
+    //! # Examples
+    //!
+    //! ```
+    //! use ko::discrete_distribution::DiscreteProbabilityDistribution;
+    //!
+    //! // define outcomes
+    //! let outcomes = vec!["a", "b", "c"];
+    //!
+    //! // define probabilities
+    //! let probabilities = vec![0.1, 0.2, 0.7];
+    //!
+    //! // create discrete probability distribution
+    //! let d = DiscreteProbabilityDistribution::new(outcomes, probabilities);
+    //!
+    //! // check probabilities
+    //! assert_eq!(d.pmf(&"a"), 0.1);
+    //! assert_eq!(d.pmf(&"b"), 0.2);
+    //! assert_eq!(d.pmf(&"c"), 0.7);
+    //! assert_eq!(d.pmf(&"d"), 0.);
+    //! ```
+
+    // define domain
+    let mut domain: Vec<T> = dist_x.outcomes();
+    domain.append(&mut dist_y.outcomes());
+    // remove duplicates
+    let domain: Vec<T> = domain
+        .iter()
+        .collect::<std::collections::HashSet<&T>>()
+        .iter()
+        .map(|&&x| x)
+        .collect::<Vec<T>>();
+    // calculate metric
+    let mut metric: f64 = 0.;
+    for x in domain {
+        metric += (dist_x.pmf(&x) - dist_y.pmf(&x)).powi(2);
+    }
+    metric.sqrt()
+}
+
+impl DiscreteProbabilityDistribution<i32> {
+    pub fn construct(samples: &Vec<i32>) -> DiscreteProbabilityDistribution<i32> {
+        //! Constructs a discrete probability distribution from a vector of samples.
+        //! The outcomes are the unique values in the vector of samples.
+        //! The probabilities are the relative frequencies of the outcomes.
+        //! The outcomes are sorted in ascending order.
+        
+        // define outcomes
+        let mut outcomes: Vec<i32> = samples
+            .iter()
+            .collect::<std::collections::HashSet<&i32>>()
+            .iter()
+            .map(|&&x| x)
+            .collect::<Vec<i32>>();
+        outcomes.sort();
+        // define probabilities
+        let probabilities: Vec<f64> = outcomes
+            .iter()
+            .map(|&x| samples.iter().filter(|&&y| y == x).count() as f64 / samples.len() as f64)
+            .collect();
+        // create discrete probability distribution
+        DiscreteProbabilityDistribution::new(outcomes, probabilities)
+    }
+
+    pub fn construct_binomial(samples: &Vec<i32>) -> DiscreteProbabilityDistribution<i32> {
+        //! Constructs a binomial distribution from a vector of samples.
+        let n: i32 = samples.len() as i32;
+        let mean: f64 = samples.iter().sum::<i32>() as f64 / n as f64;
+        let p: f64 = mean / n as f64;
+        DiscreteProbabilityDistribution::binomial(n, p)
     }
 }
