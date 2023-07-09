@@ -1,6 +1,6 @@
 //! Contains the `ContinuousProbabilityDistribution` trait and implementations.
 //!
-//! # Examples
+//! # Example Normal Distribution
 //!
 //! ```
 //! use ko::continuous_distribution::{NormalDistribution, ContinuousProbabilityDistribution};
@@ -11,9 +11,21 @@
 //! println!("cdf({}) = {}", x, normal.cdf(x));
 //! println!("sample = {}", normal.sample());
 //! ```
+//! 
+//! # Example Power Law Distribution
+//! 
+//! ```
+//! use ko::continuous_distribution::{ContinuousProbabilityDistribution, PowerLawDistribution};
+//! 
+//! let power_law = PowerLawDistribution::new(0., 2., 1.);
+//! let x = 2.;
+//! println!("pdf({}) = {}", x, power_law.pdf(x));
+//! println!("cdf({} = {}", x, power_law.cdf(x));
+//! println!("sample = {}", power_law.sample());
+//! ```
 
 use rand::distributions::Distribution;
-use statrs::distribution::Normal;
+use statrs::distribution::{Normal, Uniform};
 
 const EPSILON: f64 = 0.001; // for numerical integration
 
@@ -86,6 +98,34 @@ impl ContinuousProbabilityDistribution for NormalDistribution {
         let normal = Normal::new(self.mean, self.variance.sqrt()).unwrap();
         normal.sample(&mut rand::thread_rng())
     }
+
+    fn measure(&self, domain: &(f64, f64)) -> f64 {
+        //! Returns the measure of the distribution over the set `domain`.
+        assert!(domain.0 < domain.1);
+        
+        // define transformed domain
+        let domain_length: f64 = domain.1 - domain.0;
+        let g_a: f64 = (domain.0 - self.mean) / domain_length;
+        let g_b: f64 = (domain.1 - self.mean) / domain_length;
+
+        // measure transformed function over interval
+        let mut measure: f64 = 0.0;
+        // start at g_a and increment by epsilon until g_b
+        let mut x: f64 = g_a;
+        while x < g_b {
+            if x + EPSILON < g_b {
+                measure += EPSILON * (-0.5 * domain_length.powi(2) / self.variance * x.powi(2)).exp();
+                x += EPSILON;
+            } else {
+                measure += (g_b - x) * (-0.5 * domain_length.powi(2) / self.variance * x.powi(2)).exp();
+                break;
+            }
+        }
+        // multiply by domain length and divide by sqrt(2pi*variance)
+        measure *= domain_length / (2. * std::f64::consts::PI * self.variance).sqrt();
+        // return measure
+        measure
+    }
 }
 
 pub fn normal_distribution_metric(
@@ -122,4 +162,57 @@ pub fn normal_distribution_metric(
         }
     }
     metric.sqrt()
+}
+
+pub struct PowerLawDistribution {
+    factor: f64,
+    shift: f64,
+    exponent: f64,
+    min_x: f64, 
+}
+
+
+impl PowerLawDistribution {
+    pub fn new(shift: f64, exponent: f64, min_x: f64) -> Self {
+        //! Creates a new `FractalDistribution` from a minimum x value and an exponent.
+        assert!(exponent > 1., "exponent must be bigger than 1.");
+        assert!(shift < min_x, "min_x must be bigger than shift");
+        let factor: f64 = (exponent - 1.) / (min_x - shift).powf(1. - exponent);
+        Self { factor, shift, exponent, min_x }
+    }
+}
+
+impl ContinuousProbabilityDistribution for PowerLawDistribution {
+    fn domain(&self) -> (f64, f64) {
+        //! Returns the domain of the pdf.
+        (self.min_x, f64::INFINITY)
+    }
+
+    fn range(&self) -> (f64, f64) {
+        //! Returns the range of the pdf.
+        (0., f64::INFINITY)
+    }
+
+    fn pdf(&self, x: f64) -> f64 {
+        //! Returns the probability density function of the outcome `x`.
+        self.factor * x.powf(-self.exponent)
+    }
+
+    fn cdf(&self, x: f64) -> f64 {
+        //! Returns the cumulative distribution function of the outcome `x`.
+        self.measure(&(self.min_x, x))
+    }
+
+    fn sample(&self) -> f64 {
+        //! Returns a random outcome sampled from the distribution.
+        let uniform = Uniform::new(0., 1.).unwrap();
+        let uniform_sample = uniform.sample(&mut rand::thread_rng());
+        self.min_x * (1. - uniform_sample).powf(-1. / (1. - self.exponent))
+    }
+
+    fn measure(&self, domain: &(f64, f64)) -> f64 {
+        //! Returns the measure of the distribution over the set `domain`.
+        assert!(domain.0 < domain.1);
+        self.factor * ((domain.0 - self.shift).powf(1. - self.exponent) - (domain.1 - self.shift).powf(1. - self.exponent))
+    }
 }

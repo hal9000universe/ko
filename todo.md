@@ -1,13 +1,11 @@
 # TODO
 
-- [ ] generalize divergences to traits
-- [ ] implement construct method for binomial distribution (etc.)
-- [ ] create several (possibly different) binomial distributions and sample from them
-- [ ] reconstruct binomial distributions and evaluate reconstruction fidelity
+- [ ] analyze & plot the binomial estimation fidelity as a function of the sample size
+- [ ] estimate normal and power law distributions
+- [ ] validate normal and power law distributions
 
 
 # OKAs
 
-- [ ] discern between binomial distributions
-- [ ] generalize to continuous distributions
+- [ ] generalize  to continuous distributions
 - [ ] understand normal vs. power law distributions

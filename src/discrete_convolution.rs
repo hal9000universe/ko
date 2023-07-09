@@ -1,14 +1,12 @@
-//! # Convolution
-//!
-//! ## Discrete Convolution
+//! # Discrete Convolution
 //!
 //! The discrete convolution is used for computing the convolution between two independent integer-valued random variables.
 //!
-//! # Example Discrete Convolution
+//! # Example 
 //!
 //! ```
 //! use ko::discrete_distribution::DiscreteProbabilityDistribution;
-//! use ko::convolution::{discrete_convolution};
+//! use ko::discrete_convolution::{discrete_convolution};
 //!
 //! // create two distributions
 //! let dist1: DiscreteProbabilityDistribution<i32> = DiscreteProbabilityDistribution::new(vec![1, 2], vec![0.5, 0.5]);
@@ -34,7 +32,7 @@ pub fn discrete_convolution(
     //! # Example
     //! ```
     //! use ko::discrete_distribution::DiscreteProbabilityDistribution;
-    //! use ko::convolution::discrete_convolution;
+    //! use ko::discrete_convolution::discrete_convolution;
     //!
     //! // create multinomial distribution
     //! let probabilities: Vec<f64> = vec![0.5, 0.5];

@@ -1,5 +1,5 @@
-use ko::all;
+use ko::binomial_testing::run_binomial_distinction;
 
 fn main() {
-    all();
+    run_binomial_distinction();
 }

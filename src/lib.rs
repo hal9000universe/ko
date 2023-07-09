@@ -1,17 +1,20 @@
 pub mod cartesian_product;
 pub mod continuous_distribution;
-pub mod convolution;
+pub mod discrete_convolution;
 pub mod discrete_distribution;
-pub mod information;
-pub mod joint_distribution;
+pub mod discrete_information;
 pub mod moment;
+pub mod sample;
+pub mod binomial_testing;
 pub mod tests;
 
 use continuous_distribution::{ContinuousProbabilityDistribution, NormalDistribution};
-use convolution::discrete_convolution;
+use discrete_convolution::discrete_convolution;
 use discrete_distribution::DiscreteProbabilityDistribution;
-use information::{InformationUnit, entropy, joint_entropy, kullback_leibler_divergence, jensen_shannon_divergence};
+use discrete_information::{InformationUnit, entropy, kullback_leibler_divergence, jensen_shannon_divergence};
 use moment::{central_moment, moment};
+use sample::{continuous_sample, discrete_sample};
+use binomial_testing::{estimate_binomial, validate_binomial};
 
 
 pub fn all() {
@@ -21,16 +24,9 @@ pub fn all() {
         DiscreteProbabilityDistribution::multinomial(probabilities);
     println!("Distribution: {:?}", dist);
 
-    // joint distribution
-    let joint_dist: DiscreteProbabilityDistribution<Vec<i32>> = joint_distribution!(dist, dist);
-    println!("Joint Distribution: {:?}", joint_dist);
-
     // entropy
     let dist_entropy: InformationUnit = entropy(&dist);
     println!("Entropy: {:?}", dist_entropy);
-
-    // joint entropy
-    println!("Joint Entropy: {:?}", joint_entropy(&dist, &dist));
 
     // Kullback-Leibler divergence
     let dist_x: DiscreteProbabilityDistribution<i32> = DiscreteProbabilityDistribution::multinomial(vec![0.5, 0.5]);
@@ -65,4 +61,21 @@ pub fn all() {
     println!("Probability Density at 0: {:?}", cont_dist.pdf(0.));
     println!("Cumulative Density at 0: {:?}", cont_dist.cdf(0.));
     println!("Sample: {:?}", cont_dist.sample());
+    
+    // discrete sample
+    let disc_samples: Vec<i32> = discrete_sample(1000, &dist);
+
+    // continuous sample
+    let cont_samples: Vec<f64> = continuous_sample(1000, &cont_dist);
+    println!("Continuous Sample: {:?}", cont_samples);
+
+
+    // construct binomial distribution
+    let binom_dist: DiscreteProbabilityDistribution<i32> = estimate_binomial(&disc_samples);
+    println!("Binomial Distribution: {:?}", binom_dist);
+
+    // binomial distinction
+    let test_dist: DiscreteProbabilityDistribution<i32> = DiscreteProbabilityDistribution::binomial(0.5);
+    let distinction: bool = validate_binomial(&test_dist, &disc_samples);
+    println!("Binomial distinction test: {}", distinction);
 }

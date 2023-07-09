@@ -28,9 +28,8 @@
 //! `DiscreteProbabilityDistribution` from a vector of probabilities. The
 //! outcomes are the integers from 0 to `probabilities.len() - 1`.
 //!
-//! - 'binomial(n: usize, p: f64) -> Self': creates a new
-//! `DiscreteProbabilityDistribution` from a number of trials `n` and a
-//! probability of success `p`. The outcomes are the integers from 0 to `n`.
+//! - `binomial(p: f64) -> Self`: creates a binomial distribution with
+//! probability of success `p`.
 //!
 //! # Examples
 //!
@@ -149,20 +148,6 @@ where
     }
 }
 
-fn factorial(n: i32) -> i32 {
-    //! Returns the factorial of `n`.
-    if n == 0 || n == 1 {
-        1
-    } else {
-        (1..n + 1).fold(1, |acc, x| acc * x)
-    }
-}
-
-fn binomial_coeff(n: i32, k: i32) -> i32 {
-    //! Returns the binomial coefficient `n` over `k`.
-    factorial(n) / (factorial(k) * factorial(n - k))
-}
-
 impl DiscreteProbabilityDistribution<i32> {
     pub fn multinomial(probabilities: Vec<f64>) -> Self {
         //! Creates a new `DiscreteProbabilityDistribution` from a vector of
@@ -172,22 +157,10 @@ impl DiscreteProbabilityDistribution<i32> {
         Self::new(outcomes, probabilities)
     }
 
-    pub fn binomial(n: i32, p: f64) -> Self {
-        //! Creates a new `DiscreteProbabilityDistribution` from the parameters
-        //! of a binomial distribution.
-        //!
-        //! Panics
-        //!
-        //! Panics if `p` is not in the interval [0, 1], if `n` is not positive, or if 'n' is larger than 12.
-        assert!(p >= 0. && p <= 1., "p must be in the interval [0, 1]");
-        assert!(n > 0, "n must be positive");
-        assert!(n <= 12, "n must be smaller than 13");
-        let outcomes: Vec<i32> = (0..=n + 1).collect();
-        let probabilities: Vec<f64> = outcomes
-            .iter()
-            .map(|k| binomial_coeff(n, *k) as f64 * p.powi(*k) * (1. - p).powi(n - *k))
-            .collect();
-        Self::new(outcomes, probabilities)
+    pub fn binomial(p: f64) -> Self {
+        //! Creates a new `DiscreteProbabilityDistribution` from a probability
+        //! of success `p`. 
+        Self::multinomial(vec![1. - p, p])
     }
 }
 
@@ -206,19 +179,18 @@ where
     //! use ko::discrete_distribution::DiscreteProbabilityDistribution;
     //!
     //! // define outcomes
-    //! let outcomes = vec!["a", "b", "c"];
+    //! let outcomes: Vec<&str> = vec!["a", "b", "c"];
     //!
     //! // define probabilities
-    //! let probabilities = vec![0.1, 0.2, 0.7];
+    //! let probabilities_x: Vec<f64> = vec![0.1, 0.2, 0.7];
+    //! let probabilities_y: Vec<f64> = vec![0.2, 0.3, 0.5];
     //!
-    //! // create discrete probability distribution
-    //! let d = DiscreteProbabilityDistribution::new(outcomes, probabilities);
+    //! // create discrete probability distributions
+    //! let d_x: DiscreteProbabilityDistribution<&str> = DiscreteProbabilityDistribution::new(outcomes.clone(), probabilities_x);
+    //! let d_y: DiscreteProbabilityDistribution<&str> = DiscreteProbabilityDistribution::new(outcomes.clone(), probabilities_y);
     //!
-    //! // check probabilities
-    //! assert_eq!(d.pmf(&"a"), 0.1);
-    //! assert_eq!(d.pmf(&"b"), 0.2);
-    //! assert_eq!(d.pmf(&"c"), 0.7);
-    //! assert_eq!(d.pmf(&"d"), 0.);
+    //! // calculate metric
+    //! let metric: f64 = ko::discrete_distribution::discrete_distribution_metric(&d_x, &d_y);
     //! ```
 
     // define domain
@@ -237,37 +209,4 @@ where
         metric += (dist_x.pmf(&x) - dist_y.pmf(&x)).powi(2);
     }
     metric.sqrt()
-}
-
-impl DiscreteProbabilityDistribution<i32> {
-    pub fn construct(samples: &Vec<i32>) -> DiscreteProbabilityDistribution<i32> {
-        //! Constructs a discrete probability distribution from a vector of samples.
-        //! The outcomes are the unique values in the vector of samples.
-        //! The probabilities are the relative frequencies of the outcomes.
-        //! The outcomes are sorted in ascending order.
-        
-        // define outcomes
-        let mut outcomes: Vec<i32> = samples
-            .iter()
-            .collect::<std::collections::HashSet<&i32>>()
-            .iter()
-            .map(|&&x| x)
-            .collect::<Vec<i32>>();
-        outcomes.sort();
-        // define probabilities
-        let probabilities: Vec<f64> = outcomes
-            .iter()
-            .map(|&x| samples.iter().filter(|&&y| y == x).count() as f64 / samples.len() as f64)
-            .collect();
-        // create discrete probability distribution
-        DiscreteProbabilityDistribution::new(outcomes, probabilities)
-    }
-
-    pub fn construct_binomial(samples: &Vec<i32>) -> DiscreteProbabilityDistribution<i32> {
-        //! Constructs a binomial distribution from a vector of samples.
-        let n: i32 = samples.len() as i32;
-        let mean: f64 = samples.iter().sum::<i32>() as f64 / n as f64;
-        let p: f64 = mean / n as f64;
-        DiscreteProbabilityDistribution::binomial(n, p)
-    }
 }
