@@ -6,6 +6,7 @@ pub mod discrete_information;
 pub mod moment;
 pub mod sample;
 pub mod binomial_testing;
+pub mod continuous_testing;
 pub mod tests;
 
 use continuous_distribution::{ContinuousProbabilityDistribution, NormalDistribution};
@@ -15,6 +16,7 @@ use discrete_information::{InformationUnit, entropy, kullback_leibler_divergence
 use moment::{central_moment, moment};
 use sample::{continuous_sample, discrete_sample};
 use binomial_testing::{estimate_binomial, validate_binomial};
+use continuous_testing::{estimate_continuous_cdf, validate_continuous_cdf};
 
 
 pub fn all() {
@@ -70,12 +72,21 @@ pub fn all() {
     println!("Continuous Sample: {:?}", cont_samples);
 
 
-    // construct binomial distribution
-    let binom_dist: DiscreteProbabilityDistribution<i32> = estimate_binomial(&disc_samples);
-    println!("Binomial Distribution: {:?}", binom_dist);
+    // estimate binomial distribution
+    let est_binom_dist: DiscreteProbabilityDistribution<i32> = estimate_binomial(&disc_samples);
+    println!("Binomial Distribution: {:?}", est_binom_dist);
 
-    // binomial distinction
+    // validate binomial distribution
     let test_dist: DiscreteProbabilityDistribution<i32> = DiscreteProbabilityDistribution::binomial(0.5);
-    let distinction: bool = validate_binomial(&test_dist, &disc_samples);
-    println!("Binomial distinction test: {}", distinction);
+    let binomial_validation: bool = validate_binomial(&test_dist, &disc_samples);
+    println!("Binomial distinction test: {}", binomial_validation);
+
+    // estimate continuous distribution
+    let est_cont_dist: Vec<(f64, f64)> = estimate_continuous_cdf(&cont_samples);
+    println!("Continuous Distribution Estimate: {:?}", est_cont_dist);
+
+    // validate continuous distribution
+    let val_normal_dist: NormalDistribution = NormalDistribution::new(0., 1.);
+    let normal_validation: bool = validate_continuous_cdf(&val_normal_dist, &cont_samples);
+    println!("Continuous distinction test: {}", normal_validation);
 }
