@@ -1,5 +1,5 @@
 #[cfg(test)]
-use crate::discrete_distribution::DiscreteProbabilityDistribution;
+use crate::probability::discrete_distribution::DiscreteProbabilityDistribution;
 
 #[test]
 #[should_panic]

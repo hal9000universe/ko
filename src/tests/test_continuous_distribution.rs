@@ -1,5 +1,7 @@
 #[cfg(test)]
-use crate::continuous_distribution::{ContinuousProbabilityDistribution, NormalDistribution, PowerLawDistribution};
+use crate::probability::continuous_distribution::{
+    ContinuousProbabilityDistribution, NormalDistribution, PowerLawDistribution,
+};
 
 #[test]
 fn test_normal_cdf() {

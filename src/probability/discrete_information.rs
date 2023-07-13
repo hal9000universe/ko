@@ -1,25 +1,4 @@
-//! This module contains functions for calculating information theoretic quantities.
-//!
-//! # Example
-//! ```
-//! use ko::discrete_distribution::DiscreteProbabilityDistribution;
-//! use ko::discrete_information::{entropy, InformationUnit};
-//!
-//! // create two distributions
-//! let dist_x: DiscreteProbabilityDistribution<i32> = DiscreteProbabilityDistribution::new(vec![1, 2], vec![0.5, 0.5]);
-//! let dist_y: DiscreteProbabilityDistribution<i32> = DiscreteProbabilityDistribution::new(vec![3, 6], vec![0.5, 0.5]);
-//!
-//! // compute entropy
-//! let entropy_x: InformationUnit = entropy(&dist_x);
-//! let entropy_y: InformationUnit = entropy(&dist_y);
-//!
-//!
-//! // check outcomes and probabilities
-//! assert_eq!(entropy_x.to_float(), 1.);
-//! assert_eq!(entropy_y.to_float(), 1.);
-//! ```
-
-use crate::discrete_distribution::DiscreteProbabilityDistribution;
+use crate::probability::discrete_distribution::DiscreteProbabilityDistribution;
 
 use std::{
     f64::consts::E,
@@ -34,6 +13,7 @@ pub enum InformationUnit {
 
 impl InformationUnit {
     pub fn to_bits(&self) -> InformationUnit {
+        //! Converts `self` to bits
         match self {
             InformationUnit::Bit(x) => InformationUnit::Bit(*x),
             InformationUnit::Nat(x) => InformationUnit::Bit(x * E.log2()),
@@ -41,6 +21,7 @@ impl InformationUnit {
     }
 
     pub fn to_nats(&self) -> InformationUnit {
+        //! Converts `self` to nats
         match self {
             InformationUnit::Bit(x) => InformationUnit::Nat(x * 2f64.ln()),
             InformationUnit::Nat(x) => InformationUnit::Nat(*x),
@@ -48,6 +29,7 @@ impl InformationUnit {
     }
 
     pub fn to_float(&self) -> f64 {
+        //! Returns the value assigned to `self` as f64
         match self {
             InformationUnit::Bit(x) => *x,
             InformationUnit::Nat(x) => *x,
@@ -55,6 +37,13 @@ impl InformationUnit {
     }
 
     pub fn apply(&self, func: impl Fn(f64) -> f64) -> InformationUnit {
+        //! Applies a transformation to the value assigned to `self`
+        //!
+        //! ## Arguments:
+        //! * `func`: `impl Fn(f64) -> f64`
+        //!
+        //! ## Returns:
+        //! * an `InformationUnit` the value of which is the transformed value of `self`
         match self {
             InformationUnit::Bit(x) => InformationUnit::Bit(func(*x)),
             InformationUnit::Nat(x) => InformationUnit::Nat(func(*x)),
@@ -97,7 +86,13 @@ impl Sub for InformationUnit {
 }
 
 pub fn entropy<T>(dist: &DiscreteProbabilityDistribution<T>) -> InformationUnit {
-    //! returns the entropy of a discrete probability distribution in bits
+    //! Computes the entropy of a `DiscreteProbabilityDistribution` in bits
+    //!
+    //! ## Arguments:
+    //! * `dist`: `&DiscreteProbabilityDistribution<T>`
+    //!
+    //! ## Returns:
+    //! * `InformationUnit` corresponding to the entropy of the given `DiscreteProbabilityDistribution`
     InformationUnit::Bit(
         -dist
             .probabilities()
@@ -110,7 +105,15 @@ pub fn kullback_leibler_divergence(
     dist_x: &DiscreteProbabilityDistribution<i32>,
     dist_y: &DiscreteProbabilityDistribution<i32>,
 ) -> InformationUnit {
-    //! returns the Kullback-Leibler divergence of two discrete probability distributions in bits
+    //! Computes the Kullback-Leibler Divergence of two `DiscreteProbabilityDistribution`s in bits
+    //!
+    //! ## Arguments:
+    //! * `dist_x`: `&DiscreteProbabilityDistribution<i32`
+    //! * `dist_y`: `&DiscreteProbabilityDistribution<i32>`
+    //!
+    //! ## Returns:
+    //! * `InformationUnit` corresponding to the Kullback-Leibler Divergence of the given
+    //! `DiscreteProbabilityDistribution`s
     let mut outcomes: Vec<i32> = dist_x.outcomes();
     outcomes.append(&mut dist_y.outcomes());
     InformationUnit::Bit(
@@ -132,6 +135,15 @@ fn average_discrete_distributions(
     dist_x: &DiscreteProbabilityDistribution<i32>,
     dist_y: &DiscreteProbabilityDistribution<i32>,
 ) -> DiscreteProbabilityDistribution<i32> {
+    //! Averages two `DiscreteProbabilityDistribution`s
+    //!
+    //! ## Arguments:
+    //! * `dist_x`: `&DiscreteProbabilityDistribution<i32>`
+    //! * `dist_y`: `&DiscreteProbabilityDistribution<i32>`
+    //!
+    //! ## Returns:
+    //! * `DiscreteProbabilityDistribution` corresponding to the average distribution of the given two
+    //! `DiscreteProbabilityDistribution`s
     let mut outcomes: Vec<i32> = dist_x.outcomes();
     outcomes.append(&mut dist_y.outcomes());
     let outcomes: Vec<i32> = outcomes
@@ -152,7 +164,15 @@ pub fn jensen_shannon_divergence(
     dist_x: &DiscreteProbabilityDistribution<i32>,
     dist_y: &DiscreteProbabilityDistribution<i32>,
 ) -> InformationUnit {
-    //! returns the Jensen-Shannon divergence of two discrete probability distributions in bits
+    //! Computes the Jensen-Shannon Divergence of two `DiscreteProbabilityDistribution`s in bits
+    //!
+    //! Arguments:
+    //! * `dist_x`: `&DiscreteProbabilityDistribution`
+    //! * `dist_y`: `&DiscreteProbabilityDistribution`
+    //!
+    //! Returns:
+    //! * `InformationUnit` corresponding to the Jensen-Shannon Divergence of the given
+    //! `DiscreteProbabilityDistribution`s
     let m: DiscreteProbabilityDistribution<i32> = average_discrete_distributions(dist_x, dist_y);
     (kullback_leibler_divergence(dist_x, &m) + kullback_leibler_divergence(dist_y, &m))
         .apply(|x| x / 2.)
