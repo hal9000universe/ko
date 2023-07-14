@@ -17,7 +17,7 @@ fn continuous_set_reduce(set: &Vec<f64>) -> Vec<f64> {
     reduced_set.to_vec()
 }
 
-pub fn estimate_continuous_cdf(samples: &Vec<f64>) -> Vec<(f64, f64)> {
+pub fn ks_estimate_continuous_cdf(samples: &Vec<f64>) -> Vec<(f64, f64)> {
     //! Estimates the cumulative distribution function given a set of samples
     //!
     //! ## Arguments:
@@ -56,7 +56,7 @@ pub fn evaluate_estimated_cdf(est_dist: &Vec<(f64, f64)>, x: &f64) -> f64 {
         .1
 }
 
-pub fn validate_continuous_cdf(
+pub fn ks_validate_continuous_cdf(
     dist: &impl ContinuousProbabilityDistribution,
     samples: &Vec<f64>,
 ) -> bool {
@@ -67,7 +67,7 @@ pub fn validate_continuous_cdf(
     //!
     //! ## Returns:
     //! * `bool`, true if the estimated CDF is a good fit for the true CDF
-    let cdf: Vec<(f64, f64)> = estimate_continuous_cdf(samples);
+    let cdf: Vec<(f64, f64)> = ks_estimate_continuous_cdf(samples);
     let max_x: f64 = cdf
         .iter()
         .map(|(x, _)| *x)

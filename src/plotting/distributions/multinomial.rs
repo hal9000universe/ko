@@ -1,1 +1,0 @@
-// TODO: plot multinomial distribution (cdf, pdf, entropy, moments, etc.)

@@ -1,6 +1,6 @@
 use crate::probability::discrete_distribution::DiscreteProbabilityDistribution;
 
-pub fn moment<T>(n: i32, dist: &DiscreteProbabilityDistribution<T>) -> f64
+pub fn discrete_moment<T>(n: i32, dist: &DiscreteProbabilityDistribution<T>) -> f64
 where
     T: Copy + Into<f64>,
 {
@@ -18,7 +18,7 @@ where
         .fold(0., |sum, (x, p)| sum + (*x).into().powi(n) * p)
 }
 
-pub fn central_moment<T>(n: i32, dist: &DiscreteProbabilityDistribution<T>) -> f64
+pub fn discrete_central_moment<T>(n: i32, dist: &DiscreteProbabilityDistribution<T>) -> f64
 where
     T: Copy + Into<f64>,
 {
@@ -30,7 +30,7 @@ where
     //!
     //! ## Returns:
     //! * nth central moment of `dist`: `f64`
-    let mean: f64 = moment(1, &dist);
+    let mean: f64 = discrete_moment(1, &dist);
     dist.outcomes
         .iter()
         .zip(dist.probabilities.iter())
