@@ -45,7 +45,7 @@ pub fn plot_data(
         .max_by(|x, y| x.partial_cmp(y).unwrap())
         .unwrap();
     let mut chart = ChartBuilder::on(&root)
-        .set_label_area_size(LabelAreaPosition::Left, 80)
+        .set_label_area_size(LabelAreaPosition::Left, 120)
         .set_label_area_size(LabelAreaPosition::Bottom, 60)
         .caption(caption, ("sans-serif", 40))
         .build_cartesian_2d(min_x..max_x, min_y..max_y)?;

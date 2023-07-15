@@ -1,6 +1,6 @@
 use crate::probability::continuous_distribution::ContinuousProbabilityDistribution;
 
-const NUM_STEPS: usize = 1000;
+pub const NUM_STEPS: usize = 1000;
 const EPSILON: f64 = 0.05;
 
 fn continuous_set_reduce(set: &Vec<f64>) -> Vec<f64> {
