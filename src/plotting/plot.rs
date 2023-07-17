@@ -23,17 +23,7 @@ pub fn plot_data(
     let root = BitMapBackend::new(save_file, (1024, 768)).into_drawing_area();
     // fill the background with white
     root.fill(&WHITE)?;
-    // create chart
-    let min_y: f64 = data
-        .iter()
-        .map(|(_, y)| *y)
-        .min_by(|&x, y| x.partial_cmp(y).unwrap())
-        .unwrap();
-    let max_y: f64 = data
-        .iter()
-        .map(|(_, y)| *y)
-        .max_by(|&x, y| x.partial_cmp(y).unwrap())
-        .unwrap();
+    // find min and max values
     let min_x: f64 = data
         .iter()
         .map(|(x, _)| *x)
@@ -44,6 +34,17 @@ pub fn plot_data(
         .map(|(x, _)| *x)
         .max_by(|x, y| x.partial_cmp(y).unwrap())
         .unwrap();
+    let min_y: f64 = data
+        .iter()
+        .map(|(_, y)| *y)
+        .min_by(|&x, y| x.partial_cmp(y).unwrap())
+        .unwrap();
+    let max_y: f64 = data
+        .iter()
+        .map(|(_, y)| *y)
+        .max_by(|&x, y| x.partial_cmp(y).unwrap())
+        .unwrap();
+    // create chart
     let mut chart = ChartBuilder::on(&root)
         .set_label_area_size(LabelAreaPosition::Left, 120)
         .set_label_area_size(LabelAreaPosition::Bottom, 60)

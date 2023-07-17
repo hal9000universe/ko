@@ -39,7 +39,7 @@ pub fn ks_estimate_continuous_cdf(samples: &Vec<f64>) -> Vec<(f64, f64)> {
         .collect()
 }
 
-pub fn evaluate_estimated_cdf(est_dist: &Vec<(f64, f64)>, x: &f64) -> f64 {
+pub fn ks_evaluate_estimated_cdf(est_dist: &Vec<(f64, f64)>, x: &f64) -> f64 {
     //! Evaluates the estimated CDF at a given outcome
     //!
     //! ## Arguments:
@@ -56,17 +56,15 @@ pub fn evaluate_estimated_cdf(est_dist: &Vec<(f64, f64)>, x: &f64) -> f64 {
         .1
 }
 
-pub fn ks_validate_continuous_cdf(
-    dist: &impl ContinuousProbabilityDistribution,
-    samples: &Vec<f64>,
-) -> bool {
-    //! Performs a Kolmogorov-Smirnov test to determine if the estimated CDF is a good fit to the samples
+pub fn ks_distance(dist: &impl ContinuousProbabilityDistribution, samples: &Vec<f64>) -> f64 {
+    //! Computes the Kolmogorov-Smirnov distance between the estimated CDF and the true CDF
     //!
     //! ## Arguments:
     //! * `dist`: `&impl ContinuousProbabilityDistribution`, a continuous probability distribution
+    //! * `samples`: `&Vec<f64>`, a vector of samples
     //!
     //! ## Returns:
-    //! * `bool`, true if the estimated CDF is a good fit for the true CDF
+    //! * `f64`, the Kolmogorov-Smirnov distance between the estimated CDF and the true CDF
     let cdf: Vec<(f64, f64)> = ks_estimate_continuous_cdf(samples);
     let max_x: f64 = cdf
         .iter()
@@ -82,11 +80,26 @@ pub fn ks_validate_continuous_cdf(
     let xs: Vec<f64> = (1..NUM_STEPS)
         .map(|i| min_x + i as f64 * delta)
         .collect::<Vec<f64>>();
-
+    // compute supremum metric
     let max_diff: f64 = xs
         .iter()
-        .map(|&x| (dist.cdf(x) - evaluate_estimated_cdf(&cdf, &x)).abs())
+        .map(|&x| (dist.cdf(x) - ks_evaluate_estimated_cdf(&cdf, &x)).abs())
         .max_by(|a, b| a.partial_cmp(b).unwrap())
         .unwrap();
+    max_diff
+}
+
+pub fn ks_validate_continuous_cdf(
+    dist: &impl ContinuousProbabilityDistribution,
+    samples: &Vec<f64>,
+) -> bool {
+    //! Performs a Kolmogorov-Smirnov test to determine if the estimated CDF is a good fit to the samples
+    //!
+    //! ## Arguments:
+    //! * `dist`: `&impl ContinuousProbabilityDistribution`, a continuous probability distribution
+    //!
+    //! ## Returns:
+    //! * `bool`, true if the estimated CDF is a good fit for the true CDF
+    let max_diff: f64 = ks_distance(dist, samples);
     max_diff < EPSILON
 }

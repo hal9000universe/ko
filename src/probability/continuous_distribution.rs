@@ -13,7 +13,7 @@ pub trait ContinuousProbabilityDistribution {
     fn sample(&self) -> f64;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NormalDistribution {
     pub mean: f64,
     pub variance: f64,
@@ -32,6 +32,20 @@ impl NormalDistribution {
         //! * if `variance` is not positive
         assert!(variance > 0., "variance must be positive");
         Self { mean, variance }
+    }
+
+    pub fn estimate(samples: &Vec<f64>) -> Self {
+        //! Estimates the parameters of a normal distribution from samples.
+        //!
+        //! ## Arguments:
+        //! * `samples`: `&Vec<f64>`, samples from which to estimate the distribution
+        //!
+        //! ## Returns:
+        //! * `NormalDistribution`: a new normal distribution with the estimated parameters
+        let mean: f64 = samples.iter().sum::<f64>() / samples.len() as f64;
+        let variance: f64 =
+            samples.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / samples.len() as f64;
+        Self::new(mean, variance)
     }
 }
 
@@ -156,6 +170,7 @@ pub fn normal_distribution_metric(
     metric.sqrt()
 }
 
+#[derive(Debug, Clone)]
 pub struct PowerLawDistribution {
     factor: f64,
     shift: f64,
@@ -181,6 +196,25 @@ impl PowerLawDistribution {
             exponent,
             min_x,
         }
+    }
+
+    pub fn estimate(samples: &Vec<f64>) -> Self {
+        //! Estimates the parameters of the power law distribution from samples.
+        //!
+        //! ## Arguments:
+        //! * `samples`: `&Vec<f64>`, samples from the distribution
+        //!
+        //! ## Returns:
+        //! * `PowerLawDistribution` with the estimated parameters
+        let min_x: f64 = samples.clone().iter().min_by(|x, y| x.partial_cmp(y).unwrap()).unwrap().clone();
+        let shift: f64 = min_x - 1.;
+        let exponent: f64 = 1.
+            + samples.len() as f64
+                / samples
+                    .iter()
+                    .map(|x| (x / min_x).ln())
+                    .sum::<f64>();
+        Self::new(shift, exponent, min_x)
     }
 }
 
