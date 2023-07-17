@@ -175,28 +175,28 @@ pub fn plot_normal_power_law_distinction() -> Result<(), Box<dyn std::error::Err
         "Average KS Distance",
         "Number of Samples",
         "Normal Distribution KS Distance (Power Law Samples)",
-        "plots/distinction/power_law_normal_ks_dist.png",
+        "plots/distinction/average/power_law_normal_ks_dist.png",
     )?;
     plot_data(
         power_law_ks_dist_data,
         "Average KS Distance",
         "Number of Samples",
         "Power Law Distribution KS Distance (Power Law Samples)",
-        "plots/distinction/power_law_power_law_ks_dist.png",
+        "plots/distinction/average/power_law_power_law_ks_dist.png",
     )?;
     plot_data(
         variance_data,
         "Average Variance",
         "Number of Samples",
         "Variance of Power Law Samples",
-        "plots/distinction/power_law_variance.png",
+        "plots/distinction/average/power_law_variance.png",
     )?;
     plot_data(
         decision_entropy_data,
         "Decision Entropy",
         "Number of Samples",
         "Average Entropy of Decision Distribution",
-        "plots/distinction/power_law_normal_decision_entropy.png",
+        "plots/distinction/average/power_law_normal_decision_entropy.png",
     )?;
 
     Ok(())
