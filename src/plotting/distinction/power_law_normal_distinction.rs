@@ -12,7 +12,14 @@ use crate::probability::softmax::softmax;
 const EPSILON: f64 = 1e-10;
 const PLOT_DIR: &str = "plots/distinction/";
 
-fn collect_power_law_distinction_data(sample_dist: &impl ContinuousProbabilityDistribution) -> (Vec<(f64, f64)>, Vec<(f64, f64)>, Vec<(f64, f64)>, Vec<(f64, f64)>) {
+fn collect_power_law_distinction_data(
+    sample_dist: &impl ContinuousProbabilityDistribution,
+) -> (
+    Vec<(f64, f64)>,
+    Vec<(f64, f64)>,
+    Vec<(f64, f64)>,
+    Vec<(f64, f64)>,
+) {
     // collect data
     let mut normal_ks_dist_data: Vec<(f64, f64)> = Vec::new(); // (num_samples, ks_distance_normal)
     let mut power_law_ks_dist_data: Vec<(f64, f64)> = Vec::new(); // (num_samples, ks_distance_power_law)
@@ -38,8 +45,10 @@ fn collect_power_law_distinction_data(sample_dist: &impl ContinuousProbabilityDi
         // calculate variance
         let variance: f64 = empirical_central_moment(2, &samples);
         // calculate decision probabilities
-        let decision_probabilities: Vec<f64> =
-            softmax(&vec![1. / ks_distance_normal + EPSILON, 1. / ks_distance_power_law + EPSILON]);
+        let decision_probabilities: Vec<f64> = softmax(&vec![
+            1. / ks_distance_normal + EPSILON,
+            1. / ks_distance_power_law + EPSILON,
+        ]);
         let decision_distribution: DiscreteProbabilityDistribution<i32> =
             DiscreteProbabilityDistribution::multinomial(decision_probabilities);
         let decision_entropy: f64 = discrete_entropy(&decision_distribution).to_float();
@@ -100,35 +109,48 @@ pub fn plot_normal_power_law_distinction() -> Result<(), Box<dyn std::error::Err
     // define number of samples
     let num_samples: usize = 100;
     for idx in 0..num_samples {
-        let (normal_ks_dist_data, power_law_ks_dist_data, variance_data, decision_entropy_data) = collect_power_law_distinction_data(&power_law_sample_dist);
+        let (normal_ks_dist_data, power_law_ks_dist_data, variance_data, decision_entropy_data) =
+            collect_power_law_distinction_data(&power_law_sample_dist);
         // plot data
         plot_data(
             normal_ks_dist_data.clone(),
             "KS Distance Normal Distribution",
             "Number of Samples",
             "KS Distance",
-            &format!("{}{}{}{}.png", PLOT_DIR, "random/", idx, "-power_law_normal_ks_dist"),
+            &format!(
+                "{}{}{}{}.png",
+                PLOT_DIR, "random/", idx, "-power_law_normal_ks_dist"
+            ),
         )?;
         plot_data(
             power_law_ks_dist_data.clone(),
             "KS Distance Power Law Distribution",
             "Number of Samples",
             "KS Distance",
-            &format!("{}{}{}{}.png", PLOT_DIR, "random/", idx, "-power_law_power_law_ks_dist"),
+            &format!(
+                "{}{}{}{}.png",
+                PLOT_DIR, "random/", idx, "-power_law_power_law_ks_dist"
+            ),
         )?;
         plot_data(
             variance_data.clone(),
             "Variance",
             "Number of Samples",
             "Variance",
-            &format!("{}{}{}{}.png", PLOT_DIR, "random/", idx, "-power_law_variance"),
+            &format!(
+                "{}{}{}{}.png",
+                PLOT_DIR, "random/", idx, "-power_law_variance"
+            ),
         )?;
         plot_data(
             decision_entropy_data.clone(),
             "Decision Entropy",
             "Number of Samples",
             "Decision Entropy",
-            &format!("{}{}{}{}.png", PLOT_DIR, "random/", idx, "-power_law_decision_entropy"),
+            &format!(
+                "{}{}{}{}.png",
+                PLOT_DIR, "random/", idx, "-power_law_decision_entropy"
+            ),
         )?;
         normal_ks_dist_data_collections.push(normal_ks_dist_data);
         power_law_ks_dist_data_collections.push(power_law_ks_dist_data);
@@ -138,10 +160,13 @@ pub fn plot_normal_power_law_distinction() -> Result<(), Box<dyn std::error::Err
     println!("Collected Data");
 
     // average data over samples
-    let normal_ks_dist_data: Vec<(f64, f64)> = average_data_collection(normal_ks_dist_data_collections);
-    let power_law_ks_dist_data: Vec<(f64, f64)> = average_data_collection(power_law_ks_dist_data_collections);
+    let normal_ks_dist_data: Vec<(f64, f64)> =
+        average_data_collection(normal_ks_dist_data_collections);
+    let power_law_ks_dist_data: Vec<(f64, f64)> =
+        average_data_collection(power_law_ks_dist_data_collections);
     let variance_data: Vec<(f64, f64)> = average_data_collection(variance_data_collections);
-    let decision_entropy_data: Vec<(f64, f64)> = average_data_collection(decision_entropy_data_collections);
+    let decision_entropy_data: Vec<(f64, f64)> =
+        average_data_collection(decision_entropy_data_collections);
     println!("Averaged Data");
 
     // plot data
@@ -167,11 +192,11 @@ pub fn plot_normal_power_law_distinction() -> Result<(), Box<dyn std::error::Err
         "plots/distinction/power_law_variance.png",
     )?;
     plot_data(
-        decision_entropy_data, 
-        "Decision Entropy", 
-        "Number of Samples", 
-        "Average Entropy of Decision Distribution", 
-        "plots/distinction/power_law_normal_decision_entropy.png"
+        decision_entropy_data,
+        "Decision Entropy",
+        "Number of Samples",
+        "Average Entropy of Decision Distribution",
+        "plots/distinction/power_law_normal_decision_entropy.png",
     )?;
 
     Ok(())

@@ -206,14 +206,15 @@ impl PowerLawDistribution {
         //!
         //! ## Returns:
         //! * `PowerLawDistribution` with the estimated parameters
-        let min_x: f64 = samples.clone().iter().min_by(|x, y| x.partial_cmp(y).unwrap()).unwrap().clone();
+        let min_x: f64 = samples
+            .clone()
+            .iter()
+            .min_by(|x, y| x.partial_cmp(y).unwrap())
+            .unwrap()
+            .clone();
         let shift: f64 = min_x - 1.;
-        let exponent: f64 = 1.
-            + samples.len() as f64
-                / samples
-                    .iter()
-                    .map(|x| (x / min_x).ln())
-                    .sum::<f64>();
+        let exponent: f64 =
+            1. + samples.len() as f64 / samples.iter().map(|x| (x / min_x).ln()).sum::<f64>();
         Self::new(shift, exponent, min_x)
     }
 }
