@@ -1,5 +1,5 @@
 #[cfg(test)]
-use crate::probability::softmax::softmax;
+use crate::probability::utils::softmax::softmax;
 
 #[test]
 fn test_softmax() {

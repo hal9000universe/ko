@@ -1,7 +1,6 @@
 use rand::distributions::Distribution;
 use statrs::distribution::{Normal, Uniform};
 
-const EPSILON: f64 = 0.001; // for numerical integration
 const NUM_STEPS: usize = 10000; // for numerical integration
 
 pub trait ContinuousProbabilityDistribution {
@@ -125,49 +124,6 @@ impl ContinuousProbabilityDistribution for NormalDistribution {
         let normal: Normal = Normal::new(self.mean, self.variance.sqrt()).unwrap();
         normal.sample(&mut rand::thread_rng())
     }
-}
-
-pub fn normal_distribution_metric(
-    normal_x: &NormalDistribution,
-    normal_y: &NormalDistribution,
-) -> f64 {
-    //! Computes the metric between two normal distributions.
-    //!
-    //! ## Arguments:
-    //! * `normal_x`: `&NormalDistribution`, first normal distribution
-    //! * `normal_y`: `&NormalDistribution`, second normal distribution
-    //!
-    //! ## Returns:
-    //! * `metric`: `f64`
-
-    // define domain of metric
-    let min: f64 = match (normal_x.mean - 5. * normal_x.variance.sqrt())
-        .partial_cmp(&(normal_y.mean - 5. * normal_y.variance.sqrt()))
-    {
-        Some(std::cmp::Ordering::Less) => normal_x.mean - 5. * normal_x.variance.sqrt(),
-        _ => normal_y.mean - 5. * normal_y.variance.sqrt(),
-    };
-    let max: f64 = match (normal_x.mean + 5. * normal_x.variance.sqrt())
-        .partial_cmp(&(normal_y.mean + 5. * normal_y.variance.sqrt()))
-    {
-        Some(std::cmp::Ordering::Greater) => normal_x.mean + 5. * normal_x.variance.sqrt(),
-        _ => normal_y.mean + 5. * normal_y.variance.sqrt(),
-    };
-    let domain: (f64, f64) = (min, max);
-
-    // metric function over interval
-    let mut metric: f64 = 0.0;
-    let mut x: f64 = domain.0;
-    while x < domain.1 {
-        if x + EPSILON < domain.1 {
-            metric += EPSILON * (normal_x.pdf(x) - normal_y.pdf(x)).powi(2);
-            x += EPSILON;
-        } else {
-            metric += (domain.1 - x) * (normal_x.pdf(x) - normal_y.pdf(x)).powi(2);
-            break;
-        }
-    }
-    metric.sqrt()
 }
 
 #[derive(Debug, Clone)]

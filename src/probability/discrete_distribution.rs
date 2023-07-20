@@ -117,6 +117,51 @@ where
     }
 }
 
+pub fn discrete_convolution(
+    dist_x: &DiscreteProbabilityDistribution<i32>,
+    dist_y: &DiscreteProbabilityDistribution<i32>,
+) -> DiscreteProbabilityDistribution<i32> {
+    //! Computes a discrete convolution between two discrete probability distributions, the random variables of which are independent and integer-valued.
+    //! The convolution is computed by summing the probabilities of the cartesian product of the outcomes of the two distributions.
+    //!
+    //! ## Arguments:
+    //! * `dist_x`: `&DiscreteProbabilityDistribution<i32>`
+    //! * `dist_y`: `&DiscreteProbabilityDistribution<i32>`
+    //!
+    //! ## Returns:
+    //! * `DiscreteProbabilityDistribution<i32>`, the discrete probability distribution
+    let min: i32 =
+        dist_x.outcomes().iter().min().unwrap() + dist_y.outcomes().iter().min().unwrap();
+    let max: i32 =
+        dist_x.outcomes().iter().max().unwrap() + dist_y.outcomes().iter().max().unwrap();
+    let outcomes: Vec<i32> = (min..max + 1).collect();
+    // compute probabilities
+    let probabilities: Vec<f64> = outcomes
+        .iter()
+        .map(|&z| {
+            dist_x
+                .outcomes()
+                .iter()
+                .map(|&k| dist_x.pmf(&k) * dist_y.pmf(&(z - k)))
+                .sum()
+        })
+        .collect();
+    // filter out outcomes with zero probability
+    let outcomes: Vec<i32> = outcomes
+        .iter()
+        .zip(probabilities.iter())
+        .filter(|(_, &p)| p > 0.)
+        .map(|(&z, _)| z)
+        .collect();
+    // filter out probabilities with zero probability
+    let probabilities: Vec<f64> = probabilities
+        .iter()
+        .filter(|&p| p > &0.)
+        .map(|&p| p)
+        .collect();
+    DiscreteProbabilityDistribution::new(outcomes, probabilities)
+}
+
 impl DiscreteProbabilityDistribution<i32> {
     pub fn multinomial(probabilities: Vec<f64>) -> Self {
         //! Creates a new `DiscreteProbabilityDistribution` from a vector of
@@ -133,6 +178,24 @@ impl DiscreteProbabilityDistribution<i32> {
         Self::new(outcomes, probabilities)
     }
 
+    pub fn convoluted_multinomial(n: usize, probabilities: Vec<f64>) -> Self {
+        //! Creates a new `DiscreteProbabilityDistribution` from a vector of
+        //! probabilities by convoluting the distribution with itself `n` times.
+        //!
+        //! ## Arguments:
+        //! * `n`: `usize`, number of convolutions
+        //! * `probabilities`: `Vec<f64>`, vector of probabilities
+        //!
+        //! ## Returns:
+        //! * `DiscreteProbabilityDistribution<i32>`
+        let mut dist: DiscreteProbabilityDistribution<i32> =
+            DiscreteProbabilityDistribution::multinomial(probabilities);
+        for _ in 1..n {
+            dist = discrete_convolution(&dist, &dist);
+        }
+        dist
+    }
+
     pub fn binomial(p: f64) -> Self {
         //! Creates a new `DiscreteProbabilityDistribution` from a probability
         //! of success `p`.
@@ -145,37 +208,51 @@ impl DiscreteProbabilityDistribution<i32> {
         //! distribution
         Self::multinomial(vec![1. - p, p])
     }
+
+    pub fn convoluted_binomial(n: usize, probabilities: Vec<f64>) -> Self {
+        //! Creates a new `DiscreteProbabilityDistribution` from a vector of
+        //! probabilities by convoluting the distribution with itself `n` times.
+        //!
+        //! ## Arguments:
+        //! * `n`: `usize`, number of convolutions
+        //! * `probabilities`: `Vec<f64>`, vector of probabilities
+        //!
+        //! ## Returns:
+        //! * `DiscreteProbabilityDistribution<i32>`
+        let mut dist: DiscreteProbabilityDistribution<i32> =
+            DiscreteProbabilityDistribution::binomial(probabilities[1]);
+        for _ in 1..n {
+            dist = discrete_convolution(&dist, &dist);
+        }
+        dist
+    }
 }
 
-pub fn discrete_distribution_metric<T>(
-    dist_x: &DiscreteProbabilityDistribution<T>,
-    dist_y: &DiscreteProbabilityDistribution<T>,
-) -> f64
-where
-    T: Eq + Hash + Copy,
-{
-    //! Calculates the metric between two `DiscreteProbabilityDistribution`s.
+pub fn discrete_average_distributions(
+    dist_x: &DiscreteProbabilityDistribution<i32>,
+    dist_y: &DiscreteProbabilityDistribution<i32>,
+) -> DiscreteProbabilityDistribution<i32> {
+    //! Averages two `DiscreteProbabilityDistribution`s
     //!
     //! ## Arguments:
-    //! * `dist_x`: `&DiscreteProbabilityDistribution<T>`, one discrete probability
-    //! distribution
-    //! * `dist_y`: `&DiscreteProbabilityDistribution<T>`, another discrete probability
-    //! distribution
-
-    // define domain
-    let mut domain: Vec<T> = dist_x.outcomes();
-    domain.append(&mut dist_y.outcomes());
-    // remove duplicates
-    let domain: Vec<T> = domain
+    //! * `dist_x`: `&DiscreteProbabilityDistribution<i32>`
+    //! * `dist_y`: `&DiscreteProbabilityDistribution<i32>`
+    //!
+    //! ## Returns:
+    //! * `DiscreteProbabilityDistribution` corresponding to the average distribution of the given two
+    //! `DiscreteProbabilityDistribution`s
+    let mut outcomes: Vec<i32> = dist_x.outcomes();
+    outcomes.append(&mut dist_y.outcomes());
+    let outcomes: Vec<i32> = outcomes
         .iter()
-        .collect::<std::collections::HashSet<&T>>()
+        .map(|&x| x)
+        .collect::<std::collections::HashSet<i32>>()
         .iter()
-        .map(|&&x| x)
-        .collect::<Vec<T>>();
-    // calculate metric
-    let mut metric: f64 = 0.;
-    for x in domain {
-        metric += (dist_x.pmf(&x) - dist_y.pmf(&x)).powi(2);
-    }
-    metric.sqrt()
+        .map(|&x| x)
+        .collect();
+    let probabilities: Vec<f64> = outcomes
+        .iter()
+        .map(|x| (dist_x.pmf(x) + dist_y.pmf(x)) / 2.)
+        .collect();
+    DiscreteProbabilityDistribution::new(outcomes, probabilities)
 }

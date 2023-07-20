@@ -1,5 +1,7 @@
 #[cfg(test)]
-use crate::probability::discrete_distribution::DiscreteProbabilityDistribution;
+use crate::probability::discrete_distribution::{
+    discrete_convolution, DiscreteProbabilityDistribution,
+};
 
 #[test]
 #[should_panic]
@@ -40,4 +42,21 @@ fn test_discrete_measure() {
     );
     assert!((binomial_distribution.measure(&vec![0, 1]) - 0.75).abs() < tolerance);
     assert!((binomial_distribution.measure(&vec![0, 1, 2]) - 0.875).abs() < tolerance);
+}
+
+#[test]
+fn test_discrete_convolution() {
+    let tolerance: f64 = 1e-10;
+    let probabilities: Vec<f64> = vec![0.5, 0.5];
+    let dist: DiscreteProbabilityDistribution<i32> =
+        DiscreteProbabilityDistribution::multinomial(probabilities);
+    let conv_dist: DiscreteProbabilityDistribution<i32> = discrete_convolution(&dist, &dist);
+    assert_eq!(conv_dist.outcomes(), vec![0, 1, 2]);
+    for (x, y) in conv_dist
+        .probabilities()
+        .iter()
+        .zip(vec![0.25, 0.5, 0.25].iter())
+    {
+        assert!((x - y).abs() < tolerance);
+    }
 }
