@@ -4,7 +4,7 @@ use crate::probability::continuous_distribution::{
 };
 use crate::probability::induction::continuous_testing::ks_distance;
 use crate::probability::induction::decision_entropy::compute_decision_entropy;
-use crate::probability::utils::empirical_moment::empirical_standardized_moment;
+use crate::probability::utils::empirical_moment::empirical_moment;
 use crate::probability::utils::sample::continuous_sample;
 
 const PLOT_DIR: &str = "plots/induction/";
@@ -42,7 +42,7 @@ fn collect_power_law_distinction_data(
         let ks_distance_normal: f64 = ks_distance(&est_normal_dist, &samples);
         let ks_distance_power_law: f64 = ks_distance(&est_power_law_dist, &samples);
         // calculate standard deviation
-        let stand_dev: f64 = empirical_standardized_moment(2, &samples);
+        let stand_dev: f64 = empirical_moment(2, &samples).sqrt();
         // calculate decision probabilities
         let decision_entropy: f64 =
             compute_decision_entropy(&vec![ks_distance_normal, ks_distance_power_law]).to_float();
@@ -63,7 +63,7 @@ fn collect_power_law_distinction_data(
     )
 }
 
-pub fn average_data_collection(collection: Vec<Vec<(f64, f64)>>) -> Vec<(f64, f64)> {
+pub fn average_data_collection(collection: &Vec<Vec<(f64, f64)>>) -> Vec<(f64, f64)> {
     // average data over samples
     let data_start: Vec<(f64, f64)> = collection[0].clone();
     let data: Vec<(f64, f64)> = collection
@@ -103,8 +103,8 @@ pub fn plot_normal_power_law_distinction() -> Result<(), Box<dyn std::error::Err
     let mut stand_dev_entropy_total_collection: Vec<(f64, f64)> = Vec::new();
 
     // define number of samples
-    let num_samples: usize = 100;
-    for idx in 0..num_samples {
+    let num_trials: usize = 20;
+    for idx in 0..num_trials {
         let (
             normal_ks_dist_data,
             power_law_ks_dist_data,
@@ -170,12 +170,13 @@ pub fn plot_normal_power_law_distinction() -> Result<(), Box<dyn std::error::Err
 
     // average data over samples
     let normal_ks_dist_data: Vec<(f64, f64)> =
-        average_data_collection(normal_ks_dist_data_collections);
+        average_data_collection(&normal_ks_dist_data_collections);
     let power_law_ks_dist_data: Vec<(f64, f64)> =
-        average_data_collection(power_law_ks_dist_data_collections);
-    let stand_dev_data: Vec<(f64, f64)> = average_data_collection(stand_dev_data_collections);
+        average_data_collection(&power_law_ks_dist_data_collections);
+    let stand_dev_data: Vec<(f64, f64)> =
+        average_data_collection(&stand_dev_data_collections);
     let decision_entropy_data: Vec<(f64, f64)> =
-        average_data_collection(decision_entropy_data_collections);
+        average_data_collection(&decision_entropy_data_collections);
     println!("Averaged Data");
 
     // plot data

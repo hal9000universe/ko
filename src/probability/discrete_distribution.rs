@@ -73,6 +73,15 @@ where
         }
         self.outcomes[i - 1].clone()
     }
+
+    pub fn sample_n(&self, n: usize) -> Vec<T> {
+        //! ## Arguments:
+        //! * `n`: `usize`, number of samples
+        //!
+        //! ## Returns:
+        //! * `Vec<T>`, a vector of random outcomes
+        (0..n).map(|_| self.sample()).collect()
+    }
 }
 
 impl<T> DiscreteProbabilityDistribution<T>
@@ -190,8 +199,9 @@ impl DiscreteProbabilityDistribution<i32> {
         //! * `DiscreteProbabilityDistribution<i32>`
         let mut dist: DiscreteProbabilityDistribution<i32> =
             DiscreteProbabilityDistribution::multinomial(probabilities);
+        let base_dist: DiscreteProbabilityDistribution<i32> = dist.clone();
         for _ in 1..n {
-            dist = discrete_convolution(&dist, &dist);
+            dist = discrete_convolution(&dist, &base_dist);
         }
         dist
     }
@@ -209,7 +219,7 @@ impl DiscreteProbabilityDistribution<i32> {
         Self::multinomial(vec![1. - p, p])
     }
 
-    pub fn convoluted_binomial(n: usize, probabilities: Vec<f64>) -> Self {
+    pub fn convoluted_binomial(n: usize, p: f64) -> Self {
         //! Creates a new `DiscreteProbabilityDistribution` from a vector of
         //! probabilities by convoluting the distribution with itself `n` times.
         //!
@@ -220,11 +230,34 @@ impl DiscreteProbabilityDistribution<i32> {
         //! ## Returns:
         //! * `DiscreteProbabilityDistribution<i32>`
         let mut dist: DiscreteProbabilityDistribution<i32> =
-            DiscreteProbabilityDistribution::binomial(probabilities[1]);
+            DiscreteProbabilityDistribution::binomial(p);
+        let base_dist: DiscreteProbabilityDistribution<i32> = dist.clone();
         for _ in 1..n {
-            dist = discrete_convolution(&dist, &dist);
+            dist = discrete_convolution(&dist, &base_dist);
         }
         dist
+    }
+}
+
+impl DiscreteProbabilityDistribution<i32> {
+    pub fn estimate(samples: &Vec<i32>) -> Self {
+        //! Estimates a `DiscreteProbabilityDistribution` from a vector of
+        //! samples.
+        //!
+        //! ## Arguments:
+        //! * `samples`: `&Vec<T>`, a vector of samples
+        //!
+        //! ## Returns:
+        //! * `DiscreteProbabilityDistribution<T>`, the discrete probability
+        //! distribution
+        let mut outcomes: Vec<i32> = samples.clone();
+        outcomes.sort();
+        outcomes.dedup();
+        let probabilities: Vec<f64> = outcomes
+            .iter()
+            .map(|x| samples.iter().filter(|&y| y == x).count() as f64 / samples.len() as f64)
+            .collect();
+        Self::new(outcomes, probabilities)
     }
 }
 

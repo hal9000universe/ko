@@ -60,3 +60,28 @@ fn test_discrete_convolution() {
         assert!((x - y).abs() < tolerance);
     }
 }
+
+#[test]
+fn test_distributions() {
+    let tolerance: f64 = 1e-10;
+    // test convoluted binomial
+    let p: f64 = 0.5;
+    let binom: DiscreteProbabilityDistribution<i32> =
+        DiscreteProbabilityDistribution::convoluted_binomial(3, p);
+    let probabilities: Vec<f64> = vec![0.125, 0.375, 0.375, 0.125];
+    for idx in 0..4 {
+        assert!((binom.probabilities()[idx] - probabilities[idx]).abs() < tolerance);
+    }
+    // test convoluted multinomial
+    let probabilities: Vec<f64> = vec![0.5, 0.5];
+    let multinom: DiscreteProbabilityDistribution<i32> =
+        DiscreteProbabilityDistribution::convoluted_multinomial(3, probabilities);
+    let probabilities: Vec<f64> = vec![0.125, 0.375, 0.375, 0.125];
+    for idx in 0..4 {
+        assert!((multinom.probabilities()[idx] - probabilities[idx]).abs() < tolerance);
+    }
+    // test convoluted distributions of arbitrary size
+    let conv: DiscreteProbabilityDistribution<i32> =
+        DiscreteProbabilityDistribution::convoluted_binomial(100, 0.5);
+    assert!((0.5f64.powi(100) - conv.probabilities()[0]).abs() < tolerance);
+}
